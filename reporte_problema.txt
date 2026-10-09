@@ -1,0 +1,183 @@
+================================================================================
+  UNIVERSIDAD JOSÉ ANTONIO PÁEZ - FACULTAD DE INGENIERÍA
+================================================================================
+ESCUELA DE INGENIERÍA EN COMPUTACIÓN
+PARCIAL V: PROGRAMACIÓN DINÁMICA
+INFORME DE SALIDAS Y RESOLUCIÓN COMPUTACIONAL
+================================================================================
+
+================================================================================
+  1. PROBLEMA 1: RUTA MÁS CORTA EN GRAFO POR PROGRAMACIÓN DINÁMICA
+================================================================================
+Nodo Origen : 1 (Oficina anterior)
+Nodo Destino: 13 (Oficina nueva)
+
+--------------------------------------------------------------------------------
+  a) Programación Dinámica: Adelante hacia Atrás (Forward DP)
+--------------------------------------------------------------------------------
+Resolución de Adelante hacia Atrás (Inducción Hacia Adelante):
+1. Se establece la condición inicial en el nodo origen: f*(1) = 0.
+2. Se evalúa progresivamente cada etapa k mediante la ecuación recursiva:
+   f_n*(s) = min_{x} [ f_{n-1}^*(x) + c(x, s) ], donde x in Pred(s)
+3. Al alcanzar el nodo destino 13, se obtiene el costo mínimo total de 430.0.
+4. Reconstruyendo la ruta a partir de los predecesores óptimos x*(s), se obtiene: 1 -> 3 -> 5 -> 7 -> 10 -> 13.
+Ruta Óptima: 1 -> 3 -> 5 -> 7 -> 10 -> 13
+Costo Mínimo Total: 430.00
+
+Tablas de Etapas (Forward):
+  [Etapa 1 (Hacia Adelante, paso 1 desde origen)]: Evaluación de estados [2, 3, 4] minimizando f*(x) + c(x, s)
+    * Estado  2 | Evaluaciones: [pred 1 -> 100.0] | f*=100.0 | Decisión x*=1
+    * Estado  3 | Evaluaciones: [pred 1 -> 50.0] | f*=50.0 | Decisión x*=1
+    * Estado  4 | Evaluaciones: [pred 1 -> 40.0, pred 3 -> 70.0] | f*=40.0 | Decisión x*=1
+  [Etapa 2 (Hacia Adelante, paso 2 desde origen)]: Evaluación de estados [5, 6] minimizando f*(x) + c(x, s)
+    * Estado  5 | Evaluaciones: [pred 2 -> 200.0, pred 3 -> 150.0] | f*=150.0 | Decisión x*=3
+    * Estado  6 | Evaluaciones: [pred 4 -> 140.0, pred 5 -> 190.0] | f*=140.0 | Decisión x*=4
+  [Etapa 3 (Hacia Adelante, paso 3 desde origen)]: Evaluación de estados [7, 8, 9] minimizando f*(x) + c(x, s)
+    * Estado  7 | Evaluaciones: [pred 5 -> 270.0] | f*=270.0 | Decisión x*=5
+    * Estado  8 | Evaluaciones: [pred 5 -> 280.0, pred 7 -> 320.0] | f*=280.0 | Decisión x*=5
+    * Estado  9 | Evaluaciones: [pred 6 -> 240.0, pred 8 -> 380.0] | f*=240.0 | Decisión x*=6
+  [Etapa 4 (Hacia Adelante, paso 4 desde origen)]: Evaluación de estados [10, 11] minimizando f*(x) + c(x, s)
+    * Estado 10 | Evaluaciones: [pred 7 -> 330.0, pred 8 -> 350.0] | f*=330.0 | Decisión x*=7
+    * Estado 11 | Evaluaciones: [pred 9 -> 340.0] | f*=340.0 | Decisión x*=9
+  [Etapa 5 (Hacia Adelante, paso 5 desde origen)]: Evaluación de estados [12, 13] minimizando f*(x) + c(x, s)
+    * Estado 12 | Evaluaciones: [pred 10 -> 530.0, pred 11 -> 390.0] | f*=390.0 | Decisión x*=11
+    * Estado 13 | Evaluaciones: [pred 10 -> 430.0, pred 12 -> 490.0] | f*=430.0 | Decisión x*=10
+
+--------------------------------------------------------------------------------
+  b) Programación Dinámica: De Atrás hacia Adelante (Backward DP)
+--------------------------------------------------------------------------------
+Resolución de Atrás hacia Adelante (Inducción Hacia Atrás):
+1. Se establece la condición de frontera en el nodo destino: f*(13) = 0.
+2. Se evalúa recursivamente en sentido inverso cada etapa k mediante la ecuación de Bellman:
+   f_n*(s) = min_{x} [ c(s, x) + f_{n+1}^*(x) ]
+3. Al alcanzar el nodo origen 1, se obtiene el costo mínimo total de 430.0.
+4. Siguiendo las decisiones óptimas x*(s) desde 1 hasta 13, la ruta es: 1 -> 3 -> 5 -> 7 -> 10 -> 13.
+Ruta Óptima: 1 -> 3 -> 5 -> 7 -> 10 -> 13
+Costo Mínimo Total: 430.00
+
+Tablas de Etapas (Backward):
+  [Etapa 1 (Hacia Atrás, distancia 1 al destino)]: Evaluación de estados [12, 10] minimizando c(s, x) + f*(x)
+    * Estado 10 | Evaluaciones: [suc 13 -> 100.0, suc 12 -> 300.0] | f*=100.0 | Decisión x*=13
+    * Estado 12 | Evaluaciones: [suc 13 -> 100.0] | f*=100.0 | Decisión x*=13
+  [Etapa 2 (Hacia Atrás, distancia 2 al destino)]: Evaluación de estados [11, 8, 7] minimizando c(s, x) + f*(x)
+    * Estado  7 | Evaluaciones: [suc 8 -> 220.0, suc 10 -> 160.0] | f*=160.0 | Decisión x*=10
+    * Estado  8 | Evaluaciones: [suc 9 -> 350.0, suc 10 -> 170.0] | f*=170.0 | Decisión x*=10
+    * Estado 11 | Evaluaciones: [suc 12 -> 150.0] | f*=150.0 | Decisión x*=12
+  [Etapa 3 (Hacia Atrás, distancia 3 al destino)]: Evaluación de estados [9, 5] minimizando c(s, x) + f*(x)
+    * Estado  5 | Evaluaciones: [suc 6 -> 390.0, suc 7 -> 280.0, suc 8 -> 300.0] | f*=280.0 | Decisión x*=7
+    * Estado  9 | Evaluaciones: [suc 11 -> 250.0] | f*=250.0 | Decisión x*=11
+  [Etapa 4 (Hacia Atrás, distancia 4 al destino)]: Evaluación de estados [6, 3, 2] minimizando c(s, x) + f*(x)
+    * Estado  2 | Evaluaciones: [suc 5 -> 380.0] | f*=380.0 | Decisión x*=5
+    * Estado  3 | Evaluaciones: [suc 4 -> 470.0, suc 5 -> 380.0] | f*=380.0 | Decisión x*=5
+    * Estado  6 | Evaluaciones: [suc 9 -> 350.0] | f*=350.0 | Decisión x*=9
+  [Etapa 5 (Hacia Atrás, distancia 5 al destino)]: Evaluación de estados [4, 1] minimizando c(s, x) + f*(x)
+    * Estado  1 | Evaluaciones: [suc 2 -> 480.0, suc 3 -> 430.0, suc 4 -> 490.0] | f*=430.0 | Decisión x*=3
+    * Estado  4 | Evaluaciones: [suc 6 -> 450.0] | f*=450.0 | Decisión x*=6
+
+--------------------------------------------------------------------------------
+  c) Algoritmos Bellman-Ford y Floyd-Warshall (Python) y Explicación
+--------------------------------------------------------------------------------
+--- BELLMAN-FORD ---
+Algoritmo Bellman-Ford:
+1. Complejidad: O(V · E). Capaz de detectar ciclos negativos y manejar pesos arbitrarios.
+2. Se ejecutaron 6 iteraciones de relajación de aristas.
+3. La distancia mínima final calculada desde 1 hasta 13 es 430.0.
+4. Ruta óptima recuperada: 1 -> 3 -> 5 -> 7 -> 10 -> 13.
+Ruta: 1 -> 3 -> 5 -> 7 -> 10 -> 13 | Costo: 430.00
+
+--- FLOYD-WARSHALL ---
+Algoritmo Floyd-Warshall (Todos los pares de caminos más cortos):
+1. Complejidad: O(V³). Evalúa recursivamente D^(k)[i][j] = min(D^(k-1)[i][j], D^(k-1)[i][k] + D^(k-1)[k][j]).
+2. Se procesaron 13 etapas intermedias (un paso por cada nodo del grafo).
+3. La distancia óptima final entre origen 1 y destino 13 es 430.0.
+4. Ruta óptima recuperada: 1 -> 3 -> 5 -> 7 -> 10 -> 13.
+Ruta: 1 -> 3 -> 5 -> 7 -> 10 -> 13 | Costo: 430.00
+
+--- COMPARACIÓN DE COMPLEJIDAD Y EQUIVALENCIA TEÓRICA ---
+Todos los algoritmos convergen al costo óptimo de 430.0 con la ruta [1, 3, 5, 7, 10, 13].
+1. Equivalencia Teórica: Dado que el grafo del Parcial V es un grafo acíclico dirigido (DAG) y cumple con el Principio de Optimalidad de Bellman, los enfoques de Programación Dinámica (Adelante y Atrás) descomponen el problema en etapas de decisión idénticas en costo final.
+2. Bellman-Ford confirma la ausencia de ciclos negativos relajando todas las aristas |V|-1 veces, obteniendo la misma distancia mínima desde el nodo origen.
+3. Floyd-Warshall evalúa recursivamente todos los vértices intermedios k in {1..13}, confirmando que la submatriz D(13)[1][13] es idéntica a la distancia hallada por DP y Bellman-Ford.
+  - Programación Dinámica (Adelante hacia Atrás): Costo = 430.0, Complejidad = O(V + E) sobre DAG estructurado en etapas
+  - Programación Dinámica (De Atrás hacia Adelante): Costo = 430.0, Complejidad = O(V + E) sobre DAG estructurado en etapas
+  - Bellman-Ford: Costo = 430.0, Complejidad = O(V · E) para cualquier grafo dirigido sin ciclos negativos
+  - Floyd-Warshall: Costo = 430.0, Complejidad = O(V³) calcula todos los pares de nodos simultáneamente
+
+================================================================================
+  2. PROBLEMA 2: PROBLEMA DE VOLUMEN DE CARGA (ALGORITMO VOLUMENCARGA)
+================================================================================
+Capacidad máxima de carga: 10.0 kg
+Productos disponibles:
+  1. Tablet Samsung      | Peso: 2 kg | Precio: $40
+  2. Dron DJI Mini        | Peso: 3 kg | Precio: $50
+  3. Proyector portátil   | Peso: 4 kg | Precio: $65
+  4. Laptop ASUS ZenBook  | Peso: 5 kg | Precio: $60
+
+--------------------------------------------------------------------------------
+  Resolución Paso a Paso por Etapas:
+--------------------------------------------------------------------------------
+--- ETAPA 1: Decisión sobre 'Tablet Samsung' (Peso: 2 kg, Precio: $40.00) ---
+Ecuación recursiva: f_i(w) = max(f_{i-1}(w), f_{i-1}(w - w_i) + p_i)
+  Para capacidad w =  0 kg -> Valor óptimo = $  0.00 [EXCLUIR]
+  Para capacidad w =  2 kg -> Valor óptimo = $ 40.00 [INCLUIR]
+  Para capacidad w = 10 kg -> Valor óptimo = $ 40.00 [INCLUIR]
+
+--- ETAPA 2: Decisión sobre 'Dron DJI Mini' (Peso: 3 kg, Precio: $50.00) ---
+Ecuación recursiva: f_i(w) = max(f_{i-1}(w), f_{i-1}(w - w_i) + p_i)
+  Para capacidad w =  0 kg -> Valor óptimo = $  0.00 [EXCLUIR]
+  Para capacidad w =  3 kg -> Valor óptimo = $ 50.00 [INCLUIR]
+  Para capacidad w = 10 kg -> Valor óptimo = $ 90.00 [INCLUIR]
+
+--- ETAPA 3: Decisión sobre 'Proyector portátil' (Peso: 4 kg, Precio: $65.00) ---
+Ecuación recursiva: f_i(w) = max(f_{i-1}(w), f_{i-1}(w - w_i) + p_i)
+  Para capacidad w =  0 kg -> Valor óptimo = $  0.00 [EXCLUIR]
+  Para capacidad w =  4 kg -> Valor óptimo = $ 65.00 [INCLUIR]
+  Para capacidad w = 10 kg -> Valor óptimo = $155.00 [INCLUIR]
+
+--- ETAPA 4: Decisión sobre 'Laptop ASUS ZenBook' (Peso: 5 kg, Precio: $60.00) ---
+Ecuación recursiva: f_i(w) = max(f_{i-1}(w), f_{i-1}(w - w_i) + p_i)
+  Para capacidad w =  0 kg -> Valor óptimo = $  0.00 [EXCLUIR]
+  Para capacidad w =  5 kg -> Valor óptimo = $ 90.00 [EXCLUIR]
+  Para capacidad w = 10 kg -> Valor óptimo = $155.00 [EXCLUIR]
+
+--------------------------------------------------------------------------------
+  Matriz de Estados de Programación Dinámica V[i][w]:
+--------------------------------------------------------------------------------
+Etapa / Prod |          0kg |          1kg |          2kg |          3kg |          4kg |          5kg |          6kg |          7kg |          8kg |          9kg |         10kg
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Base (0) |       $    0 |       $    0 |       $    0 |       $    0 |       $    0 |       $    0 |       $    0 |       $    0 |       $    0 |       $    0 |       $    0
+Tablet Samsung |       $    0 |       $    0 |       $   40 |       $   40 |       $   40 |       $   40 |       $   40 |       $   40 |       $   40 |       $   40 |       $   40
+Dron DJI Mini |       $    0 |       $    0 |       $   40 |       $   50 |       $   50 |       $   90 |       $   90 |       $   90 |       $   90 |       $   90 |       $   90
+Proyector portátil |       $    0 |       $    0 |       $   40 |       $   50 |       $   65 |       $   90 |       $  105 |       $  115 |       $  115 |       $  155 |       $  155
+Laptop ASUS ZenBook |       $    0 |       $    0 |       $   40 |       $   50 |       $   65 |       $   90 |       $  105 |       $  115 |       $  115 |       $  155 |       $  155
+
+--------------------------------------------------------------------------------
+  Paquetes Seleccionados y Valor Total Máximo (Respuestas Oficiales):
+--------------------------------------------------------------------------------
+Paquetes que se deben llevar al stand:
+  -> Tablet Samsung (Peso: 2.0 kg, Valor: $40.00)
+  -> Dron DJI Mini (Peso: 3.0 kg, Valor: $50.00)
+  -> Proyector portátil (Peso: 4.0 kg, Valor: $65.00)
+
+Peso Total Ocupado : 9.0 kg
+Espacio Libre      : 1.0 kg (Holgura)
+VALOR TOTAL MÁXIMO : $155.00
+
+--------------------------------------------------------------------------------
+  Análisis de Resultados y Conclusión (Redacción para Examen):
+--------------------------------------------------------------------------------
+ANÁLISIS Y CONCLUSIÓN (Problema de Volumen de Carga):
+1. Capacidad disponible: 10 kg.
+2. Productos óptimos a transportar: Tablet Samsung (2.0 kg, $40), Dron DJI Mini (3.0 kg, $50), Proyector portátil (4.0 kg, $65).
+3. Peso total utilizado: 9.0 kg.
+4. Espacio libre en la carga (holgura): 1.0 kg.
+5. Valor comercial máximo obtenido: $155.00.
+
+JUSTIFICACIÓN TEÓRICA:
+- El algoritmo de Programación Dinámica garantiza la solución óptima global evaluando subproblemas superpuestos.
+- Es importante destacar que la solución óptima NO satura por completo la capacidad máxima de 10 kg, dejando 1 kg libre.
+- Si se intentara forzar la capacidad de 10 kg usando la Laptop ASUS ZenBook (5 kg, $60) junto con la Tablet (2 kg, $40) y el Dron (3 kg, $50), la suma de pesos sería 10 kg exactos pero el valor total sería solo $150, lo cual es estrictamente inferior a los $155 logrados con Tablet (2 kg) + Dron (3 kg) + Proyector (4 kg) = 9 kg.
+- Esto valida fehacientemente la afirmación teórica 1.e: La solución óptima de un problema de carga puede involucrar dejar espacio libre en la mochila.
+================================================================================
+  FIN DEL REPORTE ACADÉMICO
+================================================================================
