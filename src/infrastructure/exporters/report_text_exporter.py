@@ -21,17 +21,17 @@ class ReportTextExporter(ITextExporter):
 
         def sep(title: str = "") -> None:
             if title:
-                lines.append("=" * 80)
+                lines.append("=" * 76)
                 lines.append(f"  {title.upper()}")
-                lines.append("=" * 80)
+                lines.append("=" * 76)
             else:
-                lines.append("=" * 80)
+                lines.append("=" * 76)
 
         def subsep(title: str = "") -> None:
-            lines.append("-" * 80)
+            lines.append("-" * 76)
             if title:
                 lines.append(f"  {title}")
-                lines.append("-" * 80)
+                lines.append("-" * 76)
 
         sep("UNIVERSIDAD JOSÉ ANTONIO PÁEZ - FACULTAD DE INGENIERÍA")
         lines.append("ESCUELA DE INGENIERÍA EN COMPUTACIÓN")
@@ -58,8 +58,8 @@ class ReportTextExporter(ITextExporter):
         for st in forward_res.stages:
             lines.append(f"  [{st.stage_name}]: {st.description}")
             for r in st.rows:
-                evals_str = ", ".join(f"pred {p} -> {c:.1f}" for p, c in r.evaluations.items())
-                lines.append(f"    * Estado {r.state:2d} | Evaluaciones: [{evals_str}] | f*={r.optimal_cost:.1f} | Decisión x*={r.optimal_decision}")
+                evals_str = ", ".join(f"{p} -> {c:.0f}" for p, c in sorted(r.evaluations.items()))
+                lines.append(f"    * Estado {r.state:2d} | Evals: [{evals_str}] | f*={r.optimal_cost:.0f} | Decisión x*={r.optimal_decision}")
         lines.append("")
 
         # b) De Atrás hacia Adelante
@@ -72,8 +72,8 @@ class ReportTextExporter(ITextExporter):
         for st in backward_res.stages:
             lines.append(f"  [{st.stage_name}]: {st.description}")
             for r in st.rows:
-                evals_str = ", ".join(f"suc {s} -> {c:.1f}" for s, c in r.evaluations.items())
-                lines.append(f"    * Estado {r.state:2d} | Evaluaciones: [{evals_str}] | f*={r.optimal_cost:.1f} | Decisión x*={r.optimal_decision}")
+                evals_str = ", ".join(f"{s} -> {c:.0f}" for s, c in sorted(r.evaluations.items()))
+                lines.append(f"    * Estado {r.state:2d} | Evals: [{evals_str}] | f*={r.optimal_cost:.0f} | Decisión x*={r.optimal_decision}")
         lines.append("")
 
         # c) Bellman-Ford y Floyd-Warshall
@@ -110,13 +110,7 @@ class ReportTextExporter(ITextExporter):
             lines.append("")
 
         subsep("Matriz de Estados de Programación Dinámica V[i][w]:")
-        headers = ["Etapa / Prod"] + [f"{int(w):2d}kg" for w in knapsack_res.weights_header]
-        lines.append(" | ".join(f"{h:>12}" for h in headers))
-        lines.append("-" * (14 * len(headers)))
-        for i, row in enumerate(knapsack_res.dp_table):
-            row_label = knapsack_res.items_header[i] if i < len(knapsack_res.items_header) else f"Etapa {i}"
-            row_vals = [f"${v:>5.0f}" for v in row]
-            lines.append(f"{row_label:>12} | " + " | ".join(f"{val:>12}" for val in row_vals))
+        lines.extend(self._format_compact_dp_table(knapsack_res))
         lines.append("")
 
         subsep("Paquetes Seleccionados y Valor Total Máximo (Respuestas Oficiales):")
@@ -138,3 +132,41 @@ class ReportTextExporter(ITextExporter):
             f.write(content)
 
         return content
+
+    def _format_compact_dp_table(self, knapsack_res: KnapsackResult) -> List[str]:
+        """Formats the DP matrix into a clean, compact ASCII table that fits within 76 columns."""
+        output_lines: List[str] = []
+        weights = knapsack_res.weights_header
+        total_w = len(weights)
+        chunk_size = 11  # Capacities 0 to 10 per table chunk
+
+        col0_w = 17
+        item_labels = [
+            "Base f0(w)",
+            "1. Tablet (2kg)",
+            "2. Dron (3kg)",
+            "3. Proyector(4kg)",
+            "4. Laptop (5kg)",
+        ]
+
+        # Chunk columns to guarantee max width <= 76 chars in any scenario
+        for start_idx in range(0, total_w, chunk_size):
+            end_idx = min(start_idx + chunk_size, total_w)
+            chunk_weights = weights[start_idx:end_idx]
+
+            border = "+" + "-" * (col0_w + 2) + "+" + "+".join(["----"] * len(chunk_weights)) + "+"
+            header = "| " + "Capacidad (kg)".ljust(col0_w) + " |" + "".join(f"{int(w):>3} |" for w in chunk_weights)
+
+            output_lines.append(border)
+            output_lines.append(header)
+            output_lines.append(border)
+
+            for i, row in enumerate(knapsack_res.dp_table):
+                label = item_labels[i] if i < len(item_labels) else f"Etapa {i}"
+                chunk_vals = row[start_idx:end_idx]
+                row_cells = "".join(f"{int(v):>3} |" for v in chunk_vals)
+                output_lines.append(f"| {label[:col0_w].ljust(col0_w)} |{row_cells}")
+
+            output_lines.append(border)
+
+        return output_lines
